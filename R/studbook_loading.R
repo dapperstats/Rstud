@@ -57,7 +57,7 @@ load_poplink_studbook <- function(db_name = NULL,
   # add in the overlay tables if wanted (by default they are, 
   #  even if they don't exist!)
 
-    if(overlay==TRUE){
+    if(overlay == TRUE){
 
       ndbt <- length(db_tables)
       for(i in 1:ndbt){
@@ -95,7 +95,11 @@ load_poplink_studbook <- function(db_name = NULL,
   
   if(overlay == TRUE  & verbose == TRUE){
     if(nrow(output$overlayInformation) > 0){
-      print(examine_overlays(output)$overlaySummary)
+      if(nrow(output$overlayMaster) == 0){
+        print("Only empty overlays present.")
+      } else {
+        print(examine_overlays(output)$overlaySummary)
+      }
     }
   }
 

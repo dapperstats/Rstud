@@ -1,5 +1,5 @@
 Package: Rstud
-Title: Work With Studbooks
+Title: Work with Studbooks in R
 Version: 0.0.0.1
 Authors@R: person("Juniper", "Simonis", email = "simonis@dapperstats.com", role = c("aut", "cre"))
 Description: Load, visualize, and analyze studbooks in R.
