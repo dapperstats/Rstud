@@ -36,6 +36,7 @@
                                   db_tables = c("Master", "Event"), 
                                   overlay = TRUE, udf = TRUE, 
                                   verbose = TRUE)
-  create_institution_list("AZA")
+  create_institution_window("AZA")
+  create_date_window()
   
 

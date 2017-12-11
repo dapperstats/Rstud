@@ -12,7 +12,7 @@
 #' 
 
 
-create_institution_list <- function(institution_file = NULL, 
+create_institution_window <- function(institution_file = NULL, 
                                     add_institutions = NULL, 
                                     drop_institutions = NULL){
 
