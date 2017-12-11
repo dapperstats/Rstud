@@ -1,7 +1,7 @@
 ## Rstud: R interface for studbooks
 
 Rstud is a package of R functions for reading, analyzing, graphing, editing,
-and saving studbook-style data.
+and saving studbook-style data in a variety of formats.
 
 ### Status
 
@@ -28,6 +28,6 @@ The original Rstud code was written during 2013 - 2015 by J. L. Simonis while
 working as a Postdoctoral Fellow and Research Scientist at the Lincoln Park Zoo
 in Chicago, IL. The code base was developed primarily to facilitate 
 pedigree-based inbreeding analyses from studbooks, but was expanded to address
-other pedigree-based analyses as needed.
+other analyses of populations tracked in studbooks.
 The current Rstud code and package are being written by J. L. Simonis while
 working as a Freelance Scientist for DAPPER Stats. 
