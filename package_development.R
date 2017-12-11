@@ -1,9 +1,9 @@
-################################################################################
+##############################################################################
 #
 # This script facilitates development of the Rstud package
 #
 #
-################################################################################
+##############################################################################
 
   # preliminaries
 
@@ -31,10 +31,11 @@
   devtools::load_all(devtools::as.package(loc))
   devtools::document(devtools::as.package(loc))
 
+
   examplesb <- load_poplink_studbook(db_name = "Example", 
                                   db_tables = c("Master", "Event"), 
                                   overlay = TRUE, udf = TRUE, 
                                   verbose = TRUE)
-
-
+  create_institution_list("AZA")
+  
 
