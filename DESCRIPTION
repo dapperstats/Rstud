@@ -1,6 +1,6 @@
 Package: Rstud
 Title: Work with Studbooks in R
-Version: 0.0.0.1
+Version: 0.0.1
 Authors@R: person("Juniper", "Simonis", email = "simonis@dapperstats.com", role = c("aut", "cre"))
 Description: Load, visualize, and analyze studbooks in R.
 Depends: R (>= 3.4.1)
@@ -13,4 +13,4 @@ Imports: survival,
     plyr,
     MASS,
     VGAM
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

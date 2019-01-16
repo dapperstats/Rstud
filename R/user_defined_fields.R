@@ -3,33 +3,38 @@
 #' 
 #' @param studbook Studbook name
 #' @param verbose Logical about whether or not to print the UDFs
-#' @return List of overlay tables, split by overlay.
-#' @examples
+#' @return List of UDFs, each containing its levels.
 #' 
-
-examine_udfs <- function(studbook = NULL, verbose = TRUE){
+#' @export 
+#'
+examine_UDFs <- function(studbook = NULL, verbose = TRUE){
 
   UDFs <- as.character((studbook$UserDefinedField)$FieldName)
 
-  if(length(which(UDFs != "Studbook ID")) == 0)
-    return(print(
-            "There are no UDF data in the Studbook you gave the function."))
+  if(length(which(UDFs != "Studbook ID")) == 0){
+    stop("There are no UDF data in the Studbook you gave the function.")
+  }
 
   UDFs <- UDFs[which(UDFs %in% "Studbook ID" == FALSE)]
-
-  for(i in 1:length(UDFs)){
+  nUDFs <- length(UDFs)
+  output <- vector("list", length = nUDFs)
+  names(output) <- UDFs
+  for(i in 1:nUDFs){
 		
-    spot <- which(as.character((studbook$UserDefinedField)$FieldName) == 
-                  UDFs[i])
-    levs <- as.character(unique((studbook$UserDefinedFieldValue)$Value[
-              (studbook$UserDefinedFieldValue)$FieldUniqueID == spot]))
+    spot <- which((studbook$UserDefinedField)$FieldName == UDFs[i])
+    levs <- (studbook$UserDefinedFieldValue)$FieldUniqueID == spot
+    ulevs <- as.character(unique(studbook$UserDefinedFieldValue$Value[levs]))
 
-    if(verbose == TRUE){
-      print(paste("UDF: [", UDFs[i], "] with levels: [", 
-            paste0(levs, collapse = "], ["), "]", sep = ""))
+    if(verbose){
+      msg_UDF <- paste0("UDF: [", UDFs[i], "]")
+      txt_levs <- paste0(ulevs, collapse = "], [")
+      msg_levs <- paste0(" with levels: [", txt_levs, "]")
+      msg <- paste0(msg_UDF, msg_levs)
+      message(msg)
     }
+    output[[i]] <- ulevs
   }
-  return(UDFs)
+  output
 }
 	
 
@@ -44,39 +49,30 @@ examine_udfs <- function(studbook = NULL, verbose = TRUE){
 #' @param sb_ids Character vector of studbook IDs to further limit the output
 #' @return Studbook IDs of all individuals that match the levels of the UDF
 #'  as requested, with additional optional restrictions
-#' @examples
 #' 
-#' 
-
-
+#' @export 
+#'
 apply_UDF <- function(studbook = NULL, udf = NULL, levels = NULL, 
                       retain = TRUE, sb_ids = NULL){
 
   if(length(which(names(studbook) == "UserDefinedField")) == 0){
-    return(print(
-     "There is not a UDF explanation in the Studbook you gave the function."))
+    stop("There is not a UDF definition in the Studbook provided.")
   }
-
   if(length(which(names(studbook) == "UserDefinedFieldValue")) == 0){
-    return(print(
-     "There are not UDF data in the Studbook you gave the function."))
+    stop("There is not a UDF in the Studbook provided.")
   }
 
   UDFs <- as.character((studbook$UserDefinedField)$FieldName)
   whichFields <- which(UDFs %in% udf == TRUE)
+  if(length(whichFields) == 0){
+    stop("That UDF does not exist.")
+  }
 
-  if(length(whichFields) == 0)
-    return(print("That UDF does not exist."))
-
-  temp1 <- studbook$UserDefinedFieldValue[which((
-             studbook$UserDefinedFieldValue)$FieldUniqueID == whichFields),]
-
+  spots <- which(studbook$UserDefinedFieldValue$FieldUniqueID == whichFields)
+  temp1 <- studbook$UserDefinedFieldValue[spots, ]
   indivs <- temp1$StudbookID[which(temp1$Value %in% levels == retain)]
-	
-  if(length(sb_ids) == 0)
+  if(length(sb_ids) == 0){
     return(indivs)
-
-  InOut <- sb_ids %in% indivs
-  return(InOut)
-	
+  }
+  sb_ids %in% indivs
 }	

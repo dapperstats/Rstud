@@ -6,34 +6,31 @@
 #' @param ending_buffer Amount of time not to include from the ending date
 #' @param buffer_units Currently only supported for "days"
 #' @return Beginning and ending days of the date window.
-#' @examples
 #' 
-#' 
-
+#' @export 
+#'
 create_date_window <- function(starting_date = NULL, ending_date = NULL,
                                starting_buffer = 0, ending_buffer = 0,
                                buffer_units = "days"){
 
   if(length(ending_date) == 0){
-    print(paste("No ending date input.  Today's date (", Sys.Date() 
-                ,") is being used.", sep = ""))
-    ending_date <- Sys.Date()
+    today <- Sys.Date()
+    msg <- paste0("No ending date input, today (", today ,") is being used.")
+    message(msg)
+    ending_date <- today
   }
-
-  ending_date <-as.Date(ending_date)
-
+  ending_date <- as.Date(ending_date)
   if(length(starting_date)==0){
-    print("No starting date input.  1980-01-01 is being used.")
-    starting_date <-"1980-01-01"
+    message("No starting date input, 1980-01-01 is being used.")
+    starting_date <- "1980-01-01"
   }
-
   starting_date <-as.Date(starting_date)
 
-  if(buffer_units != "days")
-    return(print("No support for non-day units for the buffer yet!"))
+  if(buffer_units != "days"){
+    stop("No support for non-day units for the buffer yet")
+  }
 
-  output <- c(starting_date + starting_buffer, ending_date - ending_buffer)
-  return(output)
+  c(starting_date + starting_buffer, ending_date - ending_buffer)
 }
 
 #' Apply Date Window 
@@ -42,15 +39,12 @@ create_date_window <- function(starting_date = NULL, ending_date = NULL,
 #' @param date_window Character vector defining the dates of interest
 #' @return Logical vector of whether each date in input vector is one 
 #'  of interest
-#' @examples
 #' 
-
+#' @export 
+#'
 check_dates <- function(dates = NULL, date_window = NULL){
-
-  if(length(date_window) == 0)
-    return(NA)    
-
-  in_out <- dates %in% date_window
-  
-  return(in_out)
+  if(length(date_window) == 0){
+    return(NA)
+  }
+  dates %in% seq(date_window[1], date_window[2], 1)
 }

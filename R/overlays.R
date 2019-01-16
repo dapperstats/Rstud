@@ -6,105 +6,85 @@
 #' @param full_return Logical about whether to return the overlay or 
 #'  just details
 #' @return List of overlay tables, split by overlay.
-#' @examples
 #' 
-
+#' @export 
+#'
 examine_overlays <- function(studbook = NULL, verbose = FALSE, 
                              full_return = FALSE){
 
-  if(length(studbook) == 0)
-    return(print("No studbook given!"))
+  if(length(studbook) == 0){
+    stop("No studbook provided")
+  }
 
-  # find which elements in the input are overlay components 
+  OLcomponents <- grep("Overlay", names(studbook))
+  if(length(OLcomponents) == 0){
+    stop("There are no overlay components in the studbook.")
+  }
 
-    OLcomponents <- grep("Overlay", names(studbook))
+  nOL <- nrow(studbook$OverlayInformation)
+  if(nOL == 0){
+    stop("There are no overlays.")
+  }  
 
-  # if there aren't any overlay components, say so and end the function
-
-    if(length(OLcomponents) == 0)
-      return(print("There are no overlay components in the studbook."))
-
-  # how many overlays exist?
-
-    nOL <- nrow(studbook$OverlayInformation)
-
-  # if no overlays exist, say so and end function
-
-    if(nOL == 0){
-      if(verbose == TRUE)
-        print("There are no overlays.")
-      return()
-    }  
-
-  # if overlays exist, say how many
-
-    if(verbose == TRUE)
-      print(paste("Number of overlays in the studbook: ", nOL, sep=""))
+  if(verbose){
+    message(paste0(nOL, "overlays in the studbook"))
+  }
   
-  # collect the summary information 
+  OLsummary <- studbook$OverlayInformation
+  spots <- c("Name", "Description", "DateCreated", "DateEdited", 
+             "UserCreated", "UserEdited")
+  OLsummary <- OLsummary[ , which(colnames(OLsummary) %in% spots)]
 
-    OLsummary <- studbook$OverlayInformation
-    OLsummary <- OLsummary[ , which(colnames(OLsummary) %in% 
-                                   c("Name","Description", "DateCreated", 
-                                     "DateEdited", "UserCreated", 
-                                     "UserEdited"))]
+  output <- vector("list", 1)
+  output[[1]] <- OLsummary
+  names(output) <- "OverlaySummary"
 
-  # create the output and populate the first element with the summary
+  if(full_return){
 
-    output <- vector("list", 1)
-    output[[1]] <- OLsummary
-    names(output) <- "OverlaySummary"
+    overlayUIDs <- (studbook$OverlayInformation)$GeneratedGUID
 
-  # if full overlays are requested
+    # create a list of lists for the overlays  
+    #  (each overlay will be a list of its components, 
+    #   and then there will be a list of the overlay lists)
 
-    if(full_return == TRUE){
+    OLlist <- vector("list", length=nOL)
+    names(OLlist) <- OLsummary$Name
 
-      overlayUIDs <- (studbook$OverlayInformation)$GeneratedGUID
+    for(i in 1:nOL){
 
-      # create a list of lists for the overlays  
-      #  (each overlay will be a list of its components, 
-      #   and then there will be a list of the overlay lists)
-
-      OLlist <- vector("list", length=nOL)
-      names(OLlist) <- OLsummary$Name
-
-      for(i in 1:nOL){
-
-        sub_OLlist <- vector("list", length = length(OLcomponents))
-        names(sub_OLlist) <- names(studbook)[OLcomponents]
-        entries <- rep(0, length(sub_OLlist))  
+      sub_OLlist <- vector("list", length = length(OLcomponents))
+      names(sub_OLlist) <- names(studbook)[OLcomponents]
+      entries <- rep(0, length(sub_OLlist))  
     
-        for(j in 1:length(sub_OLlist)){
-          ff <- studbook[[OLcomponents[j]]]
-          ff <- ff[which(as.character(ff$GeneratedGUID) == 
+      for(j in 1:length(sub_OLlist)){
+        ff <- studbook[[OLcomponents[j]]]
+        ff <- ff[which(as.character(ff$GeneratedGUID) == 
                          as.character((
                            studbook$OverlayInformation)$GeneratedGUID[i])), ]
-          ff <- ff[ , -which(colnames(ff) %in% c("UniqueID", "GeneratedGUID",
+        ff <- ff[ , -which(colnames(ff) %in% c("UniqueID", "GeneratedGUID",
                                                  "IndividualGUID"))]
-          sub_OLlist[[j]] <- ff
-          entries[j] <- nrow(ff)
-        }
-
-        tablesWith <- names(sub_OLlist)[which(entries != 0)]
-      
-        sub_OLlist2 <- vector("list", length = length(tablesWith))
-      
-        for(j in 1:length(tablesWith)){
-          sub_OLlist2[[j]] <- sub_OLlist[[which(names(sub_OLlist) %in% 
-                                                tablesWith[j])]]
-        }
-
-        names(sub_OLlist2) <- names(sub_OLlist)[which(names(sub_OLlist) %in% 
-                                                      tablesWith)]
-        output[[length(output) + 1]] <- sub_OLlist2
-
+        sub_OLlist[[j]] <- ff
+        entries[j] <- nrow(ff)
       }
 
-      names(output)[2:length(output)] <- as.character(OLsummary$Name)
-    }
-    
-  return(output)
+      tablesWith <- names(sub_OLlist)[which(entries != 0)]
+      
+      sub_OLlist2 <- vector("list", length = length(tablesWith))
+      
+      for(j in 1:length(tablesWith)){
+        sub_OLlist2[[j]] <- sub_OLlist[[which(names(sub_OLlist) %in% 
+                                              tablesWith[j])]]
+      }
 
+      names(sub_OLlist2) <- names(sub_OLlist)[which(names(sub_OLlist) %in% 
+                                                      tablesWith)]
+      output[[length(output) + 1]] <- sub_OLlist2
+
+    }
+
+    names(output)[2:length(output)] <- as.character(OLsummary$Name)
+  }
+  output
 }
 
 #' Apply Selected Overlay
@@ -117,10 +97,9 @@ examine_overlays <- function(studbook = NULL, verbose = FALSE,
 #' @param add_IsHypothetical Logical of whether or not to add "IsHypothetical"
 #'  with a value of 0 in instances where the overlay is not applied
 #' @return Studbook as a named listed of database tables with overlay applied
-#' @examples
 #' 
-#' 
-
+#' @export 
+#'
 apply_overlay <- function(studbook = NULL, overlay_to_use = NULL, 
                           verbose = TRUE, remove = TRUE, 
                           add_IsHypothetical = TRUE){
@@ -237,9 +216,9 @@ apply_overlay <- function(studbook = NULL, overlay_to_use = NULL,
 #' @param add_IsHypothetical Logical of whether or not to add "IsHypothetical"
 #'  with a value of 0 in instances where the overlay is not applied
 #' @return Studbook master table with overlay applied
-#' @examples
 #' 
-
+#' @export 
+#'
 apply_overlay_master <- function(studbook = studbook, 
                                  overlay_UID_to_apply = NULL, 
                                  add_IsHypothetical = TRUE){
@@ -346,9 +325,9 @@ apply_overlay_master <- function(studbook = studbook,
 #' @param add_IsHypothetical Logical of whether or not to add "IsHypothetical"
 #'  with a value of 0 in instances where the overlay is not applied
 #' @return Studbook event table with overlay applied
-#' @examples
 #' 
-
+#' @export 
+#'
 apply_overlay_event <- function(studbook = studbook,  
                                  overlay_UID_to_apply = NULL, 
                                  add_IsHypothetical = TRUE){
@@ -458,9 +437,9 @@ apply_overlay_event <- function(studbook = studbook,
 #' @param add_IsHypothetical Logical of whether or not to add "IsHypothetical"
 #'  with a value of 0 in instances where the overlay is not applied
 #' @return Studbook sex table with overlay applied
-#' @examples
 #' 
-
+#' @export 
+#'
 apply_overlay_sex <- function(studbook = studbook,  
                                  overlay_UID_to_apply = NULL, 
                                  add_IsHypothetical = TRUE){

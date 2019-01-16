@@ -1,0 +1,6 @@
+^Meta$
+^doc$
+^in_dev.R$
+^.travis.yml$
+^.*\.Rproj$
+^\.Rproj\.user$
