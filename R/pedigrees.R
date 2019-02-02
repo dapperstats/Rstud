@@ -95,6 +95,7 @@ kinship.pedig_list <- function(id, ..., remove_hypotheticals = TRUE){
       kin <- kin[keepers, keepers]
     }
   }
+  kin
 }
 
 #' Calculate the inbreeding of a pedig_list object
